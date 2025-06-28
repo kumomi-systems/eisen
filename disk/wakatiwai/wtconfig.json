@@ -1,0 +1,17 @@
+{
+  "loglevel": "DEBUG",
+  "timeout": 0,
+  "exit": true,
+  "firmware": true,
+  "editconfig": true,
+  "menuclear": false,
+  "bootentries": [
+    {
+      "name": "Eisen",
+      "partition": 2,
+      "fstype": "FAT",
+      "ostype": "eisen",
+      "path": "/kernel"
+    }
+  ]
+} 

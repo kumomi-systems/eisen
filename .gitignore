@@ -1,0 +1,11 @@
+# IDE directories
+.vscode/
+
+# Binaries
+bin/
+target/
+*.img
+
+# Misc
+OVMF/
+mnt/
