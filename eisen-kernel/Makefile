@@ -18,6 +18,7 @@ LD_OPTS           := --script=linker.ld
 
 all: stub kernel
 	$(LD) $(LD_OPTS) $(shell find $(BIN) -name "*.[oa]") -o $(KERNEL)
+	$(HERE)/sign.sh $(KERNEL)
 
 clean:
 	rm -rf $(TARGET) $(KERNEL)

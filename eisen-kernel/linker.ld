@@ -27,7 +27,7 @@ SECTIONS
     *(.bss)
   }
   .kargs          : ALIGN(0x1000) {
-    
+    *(.kargs)
   }
   KERNEL_END      = .;
   

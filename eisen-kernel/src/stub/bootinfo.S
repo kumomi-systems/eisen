@@ -4,6 +4,7 @@
 .global bootinfo_start
 
 .equ SECTION_SIZE,        0x40
+.equ SPACE,               0x20
 
 .equ MAJOR_VERSION,       0
 .equ MINOR_VERSION,       1
@@ -17,44 +18,44 @@ bootinfo_start:
   ## Product ID section
   .align  SECTION_SIZE
   .asciz  "Eisen"                         # Magic start number
-  .align  0x10, 0x20                      # Reserved
+  .align  0x10, SPACE                     # Reserved
   .space  0x10, 0x30                      # OS UUID (unique to each instance of Eisen)
   .byte   SECTION_SIZE                    # Section Size
   .byte   MAJOR_VERSION                   # Major Version
   .byte   MINOR_VERSION                   # Minor Version
   .byte   PATCH_VERSION                   # Patch Version
   .byte   VERSION_FLAGS                   # Version Flags
-  .balign SECTION_SIZE, 0x20              # Reserved
+  .balign SECTION_SIZE, SPACE             # Reserved
   
   ## Kernel section
   .align  SECTION_SIZE
   .word   0x9459                          # Eisen UUID (bytes 0 and 1)
   .word   0x5C96                          # Eisen UUID (bytes 2 and 3)
-  .space  4, 0x20                         # Reserved
+  .space  4, SPACE                        # Reserved
   .quad   kentry                          # Address of kernel entry
-  .space  8, 0x30                         # Address of kernel args
-  .balign SECTION_SIZE, 0x20              # Reserved
+  .quad   kargs                           # Address of kernel args
+  .balign SECTION_SIZE, SPACE             # Reserved
   
   .align  SECTION_SIZE
   .word   0xBD12                          # Eisen UUID (bytes 4 and 5)
-  .balign SECTION_SIZE, 0x20              # Reserved
+  .balign SECTION_SIZE, SPACE             # Reserved
   
   .align  SECTION_SIZE
   .word   0x40E1                          # Eisen UUID (bytes 6 and 7)
-  .balign SECTION_SIZE, 0x20              # Reserved
+  .balign SECTION_SIZE, SPACE             # Reserved
   
   .align  SECTION_SIZE
   .word   0xA7FB                          # Eisen UUID (bytes 8 and 9)
-  .balign SECTION_SIZE, 0x20              # Reserved
+  .balign SECTION_SIZE, SPACE             # Reserved
 
   .align  SECTION_SIZE
   .word   0x61C5                          # Eisen UUID (bytes 10 and 11)
   .word   0x0F3D                          # Eisen UUID (bytes 12 and 13)
   .word   0xCA9A                          # Eisen UUID (bytes 14 and 15)
   
-  .space  480-(.-bootinfo_start), 0x20    # Reserved
-  .long   0x10927C92                      # CRC32 checksum
-  .space  504-(.-bootinfo_start), 0x20     
+  .space  480-(.-bootinfo_start), SPACE   # Reserved
+  .space  4, 0x00                         # CRC32 checksum
+  .space  504-(.-bootinfo_start), SPACE    
   .ascii  "InfoEnd"                       # Magic end number
   .byte   26                              # Magic end number
 bootinfo_end:
