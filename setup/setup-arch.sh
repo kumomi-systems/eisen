@@ -10,10 +10,14 @@ RT=$(realpath $(dirname $0)/..)
 PACKAGES=(
 	rustup				# Rust
 	binutils			# as, ld
+
 	gdisk					# Disk partitioning
+	rhash					# Header signing
 
 	qemu-desktop	# Virtualisation
 	ovmf					# UEFI firmware
+
+	tinyxxd				# Provides xxd
 )
 
 pacman -Syy

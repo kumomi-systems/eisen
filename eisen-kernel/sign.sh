@@ -46,5 +46,6 @@ head -c$BOOTINFO_OFFSET $KERNEL > $KERNELTMP
 cat $BIHEADER >> $KERNELTMP
 tail -c+$(($BOOTINFO_OFFSET + $BOOTINFO_SIZE)) $KERNEL >> $KERNELTMP
 mv $KERNELTMP $KERNEL
+rm $BIHEADER
 
 echo "Kernel binary $KERNEL signed successfully!"
