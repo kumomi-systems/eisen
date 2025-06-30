@@ -5,6 +5,8 @@ if [ "$(id -u)" -ne 0 ]; then
 	exit 1
 fi
 
+LOGNAME=$(logname)
+
 export RT=$(realpath $(dirname $0)/..)
 export BIN="$RT/bin"
 export DSK="$RT/disk"
@@ -14,12 +16,13 @@ export IMG="Eisen.img"
 cd $RT
 
 # Build all binaries
-make &
+sudo -u $LOGNAME make &
 BUILD_PID=$!
 
 # Produce a disk image in preparation for compiled binaries
-dd if=/dev/zero of=$IMG bs=1G count=4
-gdisk $IMG < $DSK/gdiskcmds
+sudo -u $LOGNAME dd if=/dev/zero of=$IMG bs=1G count=4
+gdisk $IMG < $DSK/gdiskcmds > /dev/null
+partprobe
 
 # Setup a loop device
 LODEV=$(losetup -f)
@@ -28,7 +31,7 @@ EISEN_PART="$LODEV"p2
 MNTPNT="$RT/mnt"
 
 losetup -P $LODEV $IMG
-mkdir $MNTPNT
+mkdir -p $MNTPNT
 
 # Create file systems
 mkfs.fat -F 32 -n "SYSEFI"  $EFI_PART

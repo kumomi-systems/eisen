@@ -35,9 +35,18 @@ done
 update_bootinfo
 echo "Inserted product UUID: $UUID"
 
+# Insert build date
+YEAR=$(printf   '%04x' $(date +%Y))
+MONTH=$(printf  '%02x' $(date +%m))
+DAY=$(printf    '%02x' $(date +%d))
+DATE="$(to_little_endian $YEAR)""$MONTH""$DAY"
+BOOTINFO_SPLIT=$(echo $BOOTINFO_SPLIT | tr ' ' '\n' | sed "10s/.*/$DATE/")
+update_bootinfo
+echo "Inserted build date: $DATE ($(date +%Y-%m-%d))"
+
 # Generate checksum
 CHECKSUM=$(rhash --crc32 $BIHEADER | tail -n1 | awk '{print $2}')
-BOOTINFO_SPLIT=$(echo $BOOTINFO_SPLIT | tr ' ' '\n' | sed "121s/.*/$(to_little_endian $CHECKSUM)/")
+BOOTINFO_SPLIT=$(echo $BOOTINFO_SPLIT | tr ' ' '\n' | sed "126s/.*/$(to_little_endian $CHECKSUM)/")
 update_bootinfo
 echo "Inserted CRC32 checksum: $CHECKSUM"
 

@@ -9,6 +9,7 @@ test = false
 bench = false
 
 [dependencies]
+eisen-lib = { path = "../eisen-lib" }
 
 [build-dependencies]
 

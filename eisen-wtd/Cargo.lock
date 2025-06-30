@@ -40,8 +40,10 @@ name = "eisen"
 version = "0.1.0"
 dependencies = [
  "eisen-lib",
- "uefi 0.34.1",
- "uefi-raw 0.10.0",
+ "sync-ptr",
+ "uefi",
+ "uefi-raw",
+ "uuid",
  "wakatiwai-udive",
 ]
 
@@ -50,7 +52,8 @@ name = "eisen-lib"
 version = "0.1.0"
 dependencies = [
  "crc",
- "uefi 0.35.0",
+ "uefi",
+ "uefi-raw",
  "uuid",
 ]
 
@@ -110,6 +113,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "sync-ptr"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b115b4cc742d11625f50e0e48ab15baf6fa548c2ec33a8d4113711886316a4f"
+
+[[package]]
 name = "ucs2"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -130,23 +139,7 @@ dependencies = [
  "ptr_meta",
  "ucs2",
  "uefi-macros",
- "uefi-raw 0.10.0",
- "uguid",
-]
-
-[[package]]
-name = "uefi"
-version = "0.35.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da7569ceafb898907ff764629bac90ac24ba4203c38c33ef79ee88c74aa35b11"
-dependencies = [
- "bitflags",
- "cfg-if",
- "log",
- "ptr_meta",
- "ucs2",
- "uefi-macros",
- "uefi-raw 0.11.0",
+ "uefi-raw",
  "uguid",
 ]
 
@@ -166,16 +159,6 @@ name = "uefi-raw"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d246ed5d6fd71c0331f0ac774a6aefb6cb9170a46f83148cacc70b09f82c87bb"
-dependencies = [
- "bitflags",
- "uguid",
-]
-
-[[package]]
-name = "uefi-raw"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7cad96b8baaf1615d3fdd0f03d04a0b487d857c1b51b19dcbfe05e2e3c447b78"
 dependencies = [
  "bitflags",
  "uguid",
@@ -205,6 +188,6 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b3c7d45ac84b81e1651ead8a4a1180f7e5a0d70cefa1d192920e7247be67f54"
 dependencies = [
- "uefi 0.34.1",
- "uefi-raw 0.10.0",
+ "uefi",
+ "uefi-raw",
 ]
