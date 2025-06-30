@@ -1,4 +1,4 @@
-# /etc/wakatiwai/driverlist
+# Wakatiwai driverlist for Eisen
 
 # Officially supported boot drivers.
 OFFICIAL_BOOT_DRIVERS=()
