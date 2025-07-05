@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 eisen-lib = { path = "../eisen-lib", features = ["alloc"] }
-sync-ptr = "0.1.4"
+elf = {version = "0.8.0", default-features = false}
 uefi = { version = "^0.34", features = ["alloc", "panic_handler"] }
 uefi-raw = "^0.10"
 uuid = { version = "1.17.0", default-features = false }

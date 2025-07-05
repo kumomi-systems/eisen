@@ -18,30 +18,35 @@ HERE              := $(RT)/eisen-kernel
 SRC               := $(HERE)/src
 TARGET            := $(HERE)/target
 
-KERNEL            := $(BIN)/kernel.bin
+STUB							:= $(BIN)/stub.bin
+KERNEL_ELF        := $(BIN)/kernel.elf
+KERNEL_BIN        := $(BIN)/kernel.bin
 
-CARGO             := cargo
+CARGO             := cargo build
 CARGO_BUILD_OPTS  := --artifact-dir $(BIN) -Zunstable-options
 
 AS                := as
 AS_OPTS           := 
 
 LD                := ld
-LD_OPTS           := --script=linker.ld
+LD_OPTS           := --script=linker.ld -static -Bsymbolic -nostdlib
 
 .SILENT:
 .PHONY: clean
 
-all: stub kernel
-	$(LD) $(LD_OPTS) $(shell find $(BIN) -name "*.[oa]") -o $(KERNEL)
-	$(HERE)/sign.sh $(KERNEL)
+all: kernel-asm kernel-rust
+	$(LD) $(LD_OPTS) $(shell find $(BIN) -name "*.[oa]") -o $(KERNEL_ELF)
+	$(HERE)/strip.sh $(STUB) $(KERNEL_ELF)
+	$(HERE)/sign.sh $(STUB)
+	cat $(STUB)				>  $(KERNEL_BIN)
+	cat $(KERNEL_ELF) >> $(KERNEL_BIN)
 
 clean:
-	rm -rf $(TARGET) $(KERNEL)
+	rm -rf $(TARGET)
 
-stub: $(shell find $(SRC)/stub -name "*.S")
-	$(AS) $(AS_OPTS) $^ -o $(BIN)/stub.o
+kernel-asm: $(shell find $(SRC) -name "*.S")
+	$(AS) $(AS_OPTS) $^ -o $(BIN)/kernel_asm.o
 
-kernel:
-	$(CARGO) build $(CARGO_BUILD_OPTS)
+kernel-rust:
+	$(CARGO) $(CARGO_BUILD_OPTS)
 	

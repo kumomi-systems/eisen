@@ -16,10 +16,13 @@
 
 use core::ffi::c_void;
 
-#[repr(C, packed)]
+#[derive(Debug)]
 pub struct SysInfo {
   pub acpi_addr:    *const c_void,
-  pub acpi_entries: usize
+  pub acpi_entries: usize,
+
+  pub graphicsinfo: SysGraphicsInfo,
+  pub meminfo:      SysMemInfo
 }
 
 impl SysInfo {
@@ -27,6 +30,43 @@ impl SysInfo {
     Self {
       acpi_addr:    0 as *const c_void,
       acpi_entries: 0,
+
+      graphicsinfo: SysGraphicsInfo::new(),
+      meminfo:      SysMemInfo::new()
+    }
+  }
+}
+
+#[derive(Debug)]
+pub struct SysGraphicsInfo {
+  pub framebuffer_base: *mut u8,
+  pub framebuffer_size: usize,
+  pub resolution:       (u32, u32),
+  pub pixels_per_line:  u32,
+  pub pixel_info:       u8
+}
+
+impl SysGraphicsInfo {
+  pub const fn new() -> Self {
+    Self {
+      framebuffer_base: 0 as *mut u8,
+      framebuffer_size: 0,
+      resolution:       (0, 0),
+      pixels_per_line:  0,
+      pixel_info:       0
+    }
+  }
+}
+
+#[derive(Debug)]
+pub struct SysMemInfo {
+
+}
+
+impl SysMemInfo {
+  pub const fn new() -> Self {
+    Self {
+      
     }
   }
 }

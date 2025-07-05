@@ -42,13 +42,13 @@ pub struct BootInfo {
 
   pub uuid0:          u16,
       res_s0_0:       [u8; 6],
-  pub kentry:         core::ptr::NonNull<extern "C" fn() -> !>,
+  pub kentry:         core::ptr::NonNull<extern "C" fn () -> !>,
   pub kargs:          core::ptr::NonNull<&'static [u8; 0x400]>,
   pub ksysinfo:       core::ptr::NonNull<crate::boot::sysinfo::SysInfo>,
-  pub kloadaddr:      u64,
-  pub kernel_offset:  u64,
+  pub stub_end:       u64,
+  pub kernel_vma:     u64,
   pub kernel_size:    u64,
-      pad_s0:         [u8; 8],
+  pub stack_top:      u64,
 
   pub uuid1:          u16,
       pad_s1:         [u8; 62],

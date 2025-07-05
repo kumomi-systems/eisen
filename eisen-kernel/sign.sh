@@ -16,11 +16,11 @@
 
 #!/bin/bash
 
-KERNEL=$1
-BIHEADER=$KERNEL.biheader
-KERNELTMP=$KERNEL.tmp
+STUB=$1
+BIHEADER=$STUB.biheader
+STUBTMP=$STUB.tmp
 
-echo "Signing kernel binary $KERNEL..."
+echo "Signing kernel stub $STUB..."
 
 BOOTINFO_SIZE=512
 BOOTINFO_OFFSET=512
@@ -31,7 +31,7 @@ to_little_endian() {
 }
 
 # Extract bootinfo
-BOOTINFO=$(xxd -s $BOOTINFO_OFFSET -l $BOOTINFO_SIZE -g0 -ps -c0 $KERNEL)
+BOOTINFO=$(xxd -s $BOOTINFO_OFFSET -l $BOOTINFO_SIZE -g0 -ps -c0 $STUB)
 BOOTINFO_SPLIT=$(echo $BOOTINFO | fold -w8 | tr ' ' '\n')
 update_bootinfo() {
   BOOTINFO=$(echo $BOOTINFO_SPLIT | tr -d ' ')
@@ -66,11 +66,12 @@ BOOTINFO_SPLIT=$(echo $BOOTINFO_SPLIT | tr ' ' '\n' | sed "126s/.*/$(to_little_e
 update_bootinfo
 echo "Inserted CRC32 checksum: $CHECKSUM"
 
-# Rebuild kernel
-head -c$BOOTINFO_OFFSET $KERNEL > $KERNELTMP
-cat $BIHEADER >> $KERNELTMP
-tail -c+$(($BOOTINFO_OFFSET + $BOOTINFO_SIZE)) $KERNEL >> $KERNELTMP
-mv $KERNELTMP $KERNEL
+# Rebuild stub
+head -c$BOOTINFO_OFFSET $STUB > $STUBTMP
+cat $BIHEADER >> $STUBTMP
+tail -c+$(($BOOTINFO_OFFSET + $BOOTINFO_SIZE)) $STUB >> $STUBTMP
+mv $STUBTMP $STUB
 rm $BIHEADER
+truncate $STUB --size=1K $STUB
 
-echo "Kernel binary $KERNEL signed successfully!"
+echo "Kernel stub $STUB signed successfully!"

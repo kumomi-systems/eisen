@@ -15,6 +15,7 @@
 ## along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 .code16
+.global mbr_trap_start
 
 .section .mbrtrap, "a"
 mbr_trap_start:

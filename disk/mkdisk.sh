@@ -32,11 +32,13 @@ export IMG="Eisen.img"
 cd $RT
 
 # Build all binaries
-sudo -u $LOGNAME make &
-BUILD_PID=$!
+sudo -u $LOGNAME make
+if [ $? -ne 0 ]; then
+	exit 1
+fi
 
 # Produce a disk image in preparation for compiled binaries
-sudo -u $LOGNAME dd if=/dev/zero of=$IMG bs=1G count=4
+sudo -u $LOGNAME dd if=/dev/zero of=$IMG bs=1M count=512
 gdisk $IMG < $DSK/gdiskcmds > /dev/null
 partprobe
 

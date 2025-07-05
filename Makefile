@@ -20,13 +20,16 @@ export BIN  := $(RT)/bin
 .SILENT:
 .PHONY: clean kernel wakatiwai-driver
 
-all: lib kernel wtd
+all: fresh lib kernel wtd
 
 clean:
 	rm -rf $(BIN)
 	make -C $(RT)/eisen-lib clean
 	make -C $(RT)/eisen-kernel clean
 	make -C $(RT)/eisen-wtd clean
+
+fresh:
+	rm -rf $(BIN)
 
 prebuild:
 	mkdir -p $(BIN)

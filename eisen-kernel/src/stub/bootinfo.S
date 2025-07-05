@@ -23,7 +23,9 @@
 .equ SPACE,               0x00
 .equ PLACEHOLDER,         0x30
 
-# Version name not .equ'd, .asciz threw a hissy fit 
+.equ HEADER_VERSION,      0
+.equ HEADER_SIZE,         0x200
+
 .equ MAJOR_VERSION,       0
 .equ MINOR_VERSION,       1
 .equ PATCH_VERSION,       0
@@ -35,10 +37,20 @@
 
 .equ VERSION_FLAGS,       0 | VERSION_FLAG_ALPHA
 
+.extern _kentry
+.extern _kargs
+.extern _ksysinfo
+.extern STUB_END
+.extern KERNEL_VMA
+.extern KERNEL_SIZE
+.extern STACK_TOP
+
 bootinfo_start:
   ## Product ID section
   .align  SECTION_SIZE
   .asciz  "Eisen"                         # Magic start number
+  .byte   HEADER_VERSION                  # Header version
+  .word   HEADER_SIZE                     # Header size in bytes
   .align  0x10, SPACE                     # Reserved
   .space  0x10, PLACEHOLDER               # Product UUID (unique to each installation of Eisen)
   .byte   SECTION_SIZE                    # Section Size
@@ -61,9 +73,10 @@ bootinfo_start:
   .quad   _kentry                         # Address of kernel entry
   .quad   _kargs                          # Address of kernel args
   .quad   _ksysinfo                       # Address of system information
-  .quad   KERNEL_LOAD_ADDR                # Address to load the kernel to 
-  .quad   KERNEL_OFFSET                   # Kernel offset relative to start of binary
+  .quad   STUB_END                        # End of stub / beginning of ELF header
+  .quad   KERNEL_VMA                      # Kernel Virtual Memory Address 
   .quad   KERNEL_SIZE                     # Size of the kernel
+  .quad   STACK_TOP                       # Top of the stack
   .balign SECTION_SIZE, SPACE             # Reserved
   
   .align  SECTION_SIZE
@@ -89,7 +102,7 @@ bootinfo_start:
   .align SECTION_SIZE
   .word   0x0F3D                          # Eisen UUID (bytes 12 and 13)
   
-  .space  0x1F0-(.-bootinfo_start), SPACE
+  .space  HEADER_SIZE-0x10-(.-bootinfo_start), SPACE
   .space  2, SPACE
   .word   0xCA9A                          # Eisen UUID (bytes 14 and 15)
   .space  4, 0x00                         # CRC32 checksum

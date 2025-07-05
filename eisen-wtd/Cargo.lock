@@ -40,7 +40,7 @@ name = "eisen"
 version = "0.1.0"
 dependencies = [
  "eisen-lib",
- "sync-ptr",
+ "elf",
  "uefi",
  "uefi-raw",
  "uuid",
@@ -56,6 +56,12 @@ dependencies = [
  "uefi-raw",
  "uuid",
 ]
+
+[[package]]
+name = "elf"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "55dd888a213fc57e957abf2aa305ee3e8a28dbe05687a251f33b637cd46b0070"
 
 [[package]]
 name = "log"
@@ -111,12 +117,6 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
-
-[[package]]
-name = "sync-ptr"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b115b4cc742d11625f50e0e48ab15baf6fa548c2ec33a8d4113711886316a4f"
 
 [[package]]
 name = "ucs2"

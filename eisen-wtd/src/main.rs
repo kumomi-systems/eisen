@@ -16,11 +16,15 @@
 
 #![no_main]
 #![no_std]
+#![feature(breakpoint)]
 
 extern crate alloc;
 
-use eisen_lib::boot::{bootinfo::BootInfo, sysinfo::SysInfo};
-use uefi::{boot::allocate_pages, println, proto::console::text::*};
+mod sysinfo;
+
+use eisen_lib::boot::bootinfo::BootInfo;
+use elf::{abi::PT_LOAD, endian::NativeEndian, ElfBytes};
+use uefi::{boot::{allocate_pages, PAGE_SIZE}, println, proto::console::text::*};
 
 wakatiwai_udive::boot_prelude!();
 
@@ -39,7 +43,7 @@ fn main(args: &BootDriverArgs) -> Option<Status> {
   match BootInfo::parse((args.img[0x200..0x400]).try_into().unwrap()) {
     Ok(ok) => {
       bootinfo = ok;
-      println!("Validated kernel header.");
+      println!("Validated kernel header");
     }
     Err(err) => {
       println!("Failed to validate kernel header: {:?}", err);
@@ -49,56 +53,60 @@ fn main(args: &BootDriverArgs) -> Option<Status> {
   
   let checksum = bootinfo.checksum;
   println!("Header information:");
-  println!("  UUID:     {:#X}", uuid::Uuid::from_bytes(bootinfo.install_uuid));
-  println!("  Version:  {}", bootinfo.version_info());
-  println!("  Built:    {}", bootinfo.date());
-  println!("  Checksum: {:X}", checksum);
+  println!("  UUID:         {:#X}", uuid::Uuid::from_bytes(bootinfo.install_uuid));
+  println!("  Version:      {}", bootinfo.version_info());
+  println!("  Built:        {}", bootinfo.date());
+  println!("  Checksum:     {:X}", checksum);
+  println!("  Stub End:     {:#X}", bootinfo.stub_end.abs_diff(0));
 
-  println!("Loading kernel...");
-  println!("  Kernel load address:  {:#010X}", bootinfo.kloadaddr.abs_diff(0));
-  println!("  Kernel size:          {} ({} pages)", bootinfo.kernel_size_pretty(), (bootinfo.kernel_size as usize + uefi::boot::PAGE_SIZE - 1) / uefi::boot::PAGE_SIZE);
-  let kernel_phys_addr: *mut u8;
-  match allocate_pages(
-    uefi::boot::AllocateType::Address(bootinfo.kloadaddr),
-    uefi::boot::MemoryType::LOADER_DATA,
-    (bootinfo.kernel_size as usize + uefi::boot::PAGE_SIZE - 1) / uefi::boot::PAGE_SIZE
+  let kernel_elf: ElfBytes<NativeEndian>;
+  match ElfBytes::<NativeEndian>::minimal_parse(
+    &args.img[bootinfo.stub_end as usize..]
   ) {
     Ok(ok) => {
-      kernel_phys_addr = ok.as_ptr();
+      println!("Successfully parsed kernel ELF");
+      kernel_elf = ok;
     }
     Err(err) => {
-      println!("Unable to load kernel to requested address: {:?}", err.status());
+      println!("Failed to parse kernel ELF: {:?}", err);
       return Some(Status::ABORTED);
     }
   }
-  unsafe {
-    let kernel = args.img.clone();
-    core::slice::from_raw_parts_mut(kernel_phys_addr, bootinfo.kernel_size as usize).copy_from_slice(&kernel[..]);
+
+  for segment in kernel_elf.segments().unwrap() {
+    println!("offset: {:#010X}, lma: {:#010X}, vma: {:#010X}", segment.p_offset, segment.p_paddr, segment.p_vaddr);
+    if segment.p_type == PT_LOAD {
+      let segment_pages = (segment.p_memsz as usize + PAGE_SIZE - 1) / PAGE_SIZE;
+      let segment_load_addr = allocate_pages(
+        uefi::boot::AllocateType::Address(segment.p_vaddr),
+        uefi::boot::MemoryType::LOADER_DATA,
+        segment_pages
+      ).unwrap();
+
+      unsafe {
+        core::ptr::copy_nonoverlapping(
+          args.img.as_ptr()
+            .add(bootinfo.stub_end as usize)
+            .add(segment.p_offset as usize),
+          segment_load_addr.as_ptr(),
+          segment.p_filesz as usize
+        );
+      }
+    }
   }
 
-  println!("Setting system information...");
-  let sysinfo: SysInfo;
   unsafe {
-    let sys_table_raw = uefi::table::system_table_raw().unwrap().as_mut();
-    sysinfo = SysInfo {
-      acpi_addr:      (*sys_table_raw.configuration_table).vendor_table,
-      acpi_entries:   sys_table_raw.number_of_configuration_table_entries
-    };
-    *(bootinfo.ksysinfo.as_ptr()) = sysinfo;
-  }
+    *(bootinfo.ksysinfo.as_ptr()) = crate::sysinfo::load_system_information();
 
-  println!("Jumping to kernel...");
-  unsafe {
-    let kentry = bootinfo.kentry;
-    println!("Kernel location: {:#010X}", kentry.as_ptr().addr());
-    println!(
-      "First four bytes: {:#04X} {:#04X} {:#04X} {:#04X}",
-      *((kentry.as_ptr() as *mut u8).add(0)),
-      *((kentry.as_ptr() as *mut u8).add(1)),
-      *((kentry.as_ptr() as *mut u8).add(2)),
-      *((kentry.as_ptr() as *mut u8).add(3))
+    println!("Jumping to kernel entry point @ {:#010X}...", kernel_elf.ehdr.e_entry);
+    let _ = uefi::boot::exit_boot_services(uefi::boot::MemoryType::LOADER_DATA);
+    core::arch::asm!(
+      r#"
+        call {}
+      "#,
+      in(reg) kernel_elf.ehdr.e_entry,
     );
-    
-    kentry.as_ref()();
   }
+
+  unreachable!()
 }
