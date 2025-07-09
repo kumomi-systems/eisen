@@ -17,6 +17,25 @@
 #![no_std]
 #![no_main]
 
+#![feature(
+  abi_x86_interrupt
+)]
+
+#![allow(
+  unsafe_op_in_unsafe_fn
+)]
+
 mod arch;
+pub mod debug;
 mod kdata;
-mod panic;
+mod helpers;
+
+#[unsafe(no_mangle)]
+extern "C" fn _kmain() -> ! {
+  debugln!("Entered _kmain");
+
+  #[allow(unconditional_panic)]
+  let x = 12 / 0;
+  
+  loop {}
+}

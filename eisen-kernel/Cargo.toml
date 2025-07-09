@@ -10,13 +10,18 @@ bench = false
 
 [dependencies]
 eisen-lib = { path = "../eisen-lib" }
+x86_64 = { version = "0.15.2", features = ["instructions", "abi_x86_interrupt"] }
 
 [build-dependencies]
 
 [profile.dev]
+lto = true
 panic = "abort"
 
 [profile.release]
+lto = true
+opt-level = "z"
 panic = "abort"
+strip = true
 
 

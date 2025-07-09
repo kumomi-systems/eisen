@@ -1,6 +1,6 @@
 {
   "loglevel": "DEBUG",
-  "timeout": 0,
+  "timeout": 5,
   "exit": true,
   "firmware": true,
   "editconfig": true,

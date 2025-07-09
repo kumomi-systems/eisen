@@ -33,8 +33,8 @@ SECTIONS
   .             = KERNEL_VMA;
   .             += STUB_END;
   KERNEL_START  = .;
-
   .kentry   ALIGN(4K)     : AT (ADDR (.kentry) - KERNEL_VMA) {
+    *(.kentry.entry)
     *(.kentry)
   }
   .kdata    ALIGN(4K)     : AT (ADDR (.kdata)  - KERNEL_VMA) {
@@ -53,8 +53,9 @@ SECTIONS
     *(.data.*)
   }
   .bss      ALIGN(4K)     : AT (ADDR (.bss)    - KERNEL_VMA) {
-    *(COMMON)
     *(.bss)
+    *(.bss.*)
+    *(COMMON)
   }
 
   KERNEL_SIZE   = . - KERNEL_START;

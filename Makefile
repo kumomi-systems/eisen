@@ -21,6 +21,7 @@ export BIN  := $(RT)/bin
 .PHONY: clean kernel wakatiwai-driver
 
 all: fresh lib kernel wtd
+	objdump -xDS $(BIN)/kernel.elf > $(BIN)/kernel.elf.dis
 
 clean:
 	rm -rf $(BIN)

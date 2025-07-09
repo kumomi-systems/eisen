@@ -14,39 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod gdt;
-pub mod int;
-pub mod mem;
-pub mod ports;
-
-use core::ffi::c_void;
-
-use x86_64::instructions::interrupts;
-
 use crate::debugln;
 
-unsafe extern "C" {
-  static STACK_TOP: *const c_void; 
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn isr_handler(vector: u64, rsp: u64) {
+  debugln!("ISR");
+  match vector {
+    _ => {
+      panic!("{}", rsp);
+    }
+  }
 }
 
 #[unsafe(no_mangle)]
-#[unsafe(link_section = ".kentry.entry")]
-unsafe extern "C" fn _kentry() -> ! {
-  debugln!("Kernel entry");
-  
-  interrupts::disable();
-  debugln!("Disabled interrupts");
-  
-  core::arch::asm!(
-    "mov {}, rsp",
-    in(reg) STACK_TOP
-  );
-  debugln!("Initialised stack");
-
-  gdt::load_gdt();
-  int::load_interrupts();
-  interrupts::enable();
-  debugln!("Enabled interrupts");
-
-  crate::_kmain();
+pub unsafe extern "C" fn irq_handler(vector: u64, rsp: u64) {
+  debugln!("IRQ");
+  match vector {
+    _ => {
+      
+    }
+  }
+  super::pic::acknowledge((vector-0x20) as u8);
 }

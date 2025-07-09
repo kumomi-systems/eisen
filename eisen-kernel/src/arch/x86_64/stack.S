@@ -14,17 +14,11 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#!/bin/bash
+.code64
 
-RT=$(realpath $(dirname $0)/..)
-
-qemu-system-x86_64          \
-  -L OVMF/                  \
-  -pflash OVMF/OVMF.4m.fd   \
-  -net none                 \
-  -usb $RT/Eisen.img        \
-  -vga std                  \
-  -enable-kvm               \
-	-cpu host                 \
-  -m 4G                     \
-  -debugcon stdio
+.section .bss
+.equ STACK_SIZE, 0x4000
+.global STACK_TOP
+STACK_BOTTOM:
+  .space STACK_SIZE
+STACK_TOP:

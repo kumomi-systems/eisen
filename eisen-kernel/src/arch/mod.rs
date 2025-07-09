@@ -14,4 +14,5 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod x86_64;

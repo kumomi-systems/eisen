@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use core::panic::PanicInfo;
-
-#[panic_handler]
-fn kpanic(_info: &PanicInfo) -> ! {
-  loop {}
+pub unsafe fn init_memory() {
+  
 }
