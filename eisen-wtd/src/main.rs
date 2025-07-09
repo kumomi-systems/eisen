@@ -20,11 +20,11 @@
 
 extern crate alloc;
 
+mod elf;
 mod sysinfo;
 
-use eisen_lib::boot::bootinfo::BootInfo;
-use elf::{abi::PT_LOAD, endian::NativeEndian, ElfBytes};
-use uefi::{boot::{allocate_pages, PAGE_SIZE}, println, proto::console::text::*};
+use eisen_lib::boot::bootinfo::{BootInfo, KernelType};
+use uefi::{println, proto::console::text::*};
 
 wakatiwai_udive::boot_prelude!();
 
@@ -59,54 +59,12 @@ fn main(args: &BootDriverArgs) -> Option<Status> {
   println!("  Checksum:     {:X}", checksum);
   println!("  Stub End:     {:#X}", bootinfo.stub_end.abs_diff(0));
 
-  let kernel_elf: ElfBytes<NativeEndian>;
-  match ElfBytes::<NativeEndian>::minimal_parse(
-    &args.img[bootinfo.stub_end as usize..]
-  ) {
-    Ok(ok) => {
-      println!("Successfully parsed kernel ELF");
-      kernel_elf = ok;
+  match bootinfo.kernel_type {
+    KernelType::Elf => {
+      elf::load_elf_kernel(args, &bootinfo)
     }
-    Err(err) => {
-      println!("Failed to parse kernel ELF: {:?}", err);
-      return Some(Status::ABORTED);
+    _ => {
+      todo!()
     }
   }
-
-  for segment in kernel_elf.segments().unwrap() {
-    println!("offset: {:#010X}, lma: {:#010X}, vma: {:#010X}", segment.p_offset, segment.p_paddr, segment.p_vaddr);
-    if segment.p_type == PT_LOAD {
-      let segment_pages = (segment.p_memsz as usize + PAGE_SIZE - 1) / PAGE_SIZE;
-      let segment_load_addr = allocate_pages(
-        uefi::boot::AllocateType::Address(segment.p_vaddr),
-        uefi::boot::MemoryType::LOADER_DATA,
-        segment_pages
-      ).unwrap();
-
-      unsafe {
-        core::ptr::copy_nonoverlapping(
-          args.img.as_ptr()
-            .add(bootinfo.stub_end as usize)
-            .add(segment.p_offset as usize),
-          segment_load_addr.as_ptr(),
-          segment.p_filesz as usize
-        );
-      }
-    }
-  }
-
-  unsafe {
-    *(bootinfo.ksysinfo.as_ptr()) = crate::sysinfo::load_system_information();
-
-    println!("Jumping to kernel entry point @ {:#010X}...", kernel_elf.ehdr.e_entry);
-    let _ = uefi::boot::exit_boot_services(uefi::boot::MemoryType::LOADER_DATA);
-    core::arch::asm!(
-      r#"
-        call {}
-      "#,
-      in(reg) kernel_elf.ehdr.e_entry,
-    );
-  }
-
-  unreachable!()
 }

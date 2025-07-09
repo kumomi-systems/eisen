@@ -26,7 +26,10 @@ use uuid::{uuid, Uuid};
 #[repr(C, packed)]
 pub struct BootInfo {
   pub magic_start:    [u8; 6],
-      res_t_0:        [u8; 10],
+  pub header_version: u8,
+  pub kernel_type:    KernelType,
+  pub header_size:    u16,
+      res_t_0:        [u8; 6],
   pub install_uuid:   [u8; 16],
   pub section_size:   u8,
       res_t_1:        [u8; 3],
@@ -71,8 +74,14 @@ pub struct BootInfo {
   pub checksum:       u32,
   pub magic_end:      [u8; 8]
 }
-
 pub type BootInfoByteArray = [u8; size_of::<BootInfo>()];
+
+#[derive(Clone, Copy, Debug)]
+#[repr(u8)]
+pub enum KernelType {
+  Flat  = 0,
+  Elf   = 1
+}
 
 #[derive(Debug)]
 pub enum BootInfoInvalidError {

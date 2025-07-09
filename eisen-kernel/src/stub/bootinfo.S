@@ -26,6 +26,10 @@
 .equ HEADER_VERSION,      0
 .equ HEADER_SIZE,         0x200
 
+.equ KERNEL_TYPE_FLAT,    0
+.equ KERNEL_TYPE_ELF,     1
+.equ KERNEL_TYPE,         KERNEL_TYPE_ELF
+
 .equ MAJOR_VERSION,       0
 .equ MINOR_VERSION,       1
 .equ PATCH_VERSION,       0
@@ -50,6 +54,7 @@ bootinfo_start:
   .align  SECTION_SIZE
   .asciz  "Eisen"                         # Magic start number
   .byte   HEADER_VERSION                  # Header version
+  .byte   KERNEL_TYPE                     # Kernel type
   .word   HEADER_SIZE                     # Header size in bytes
   .align  0x10, SPACE                     # Reserved
   .space  0x10, PLACEHOLDER               # Product UUID (unique to each installation of Eisen)

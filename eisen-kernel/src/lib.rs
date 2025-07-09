@@ -33,9 +33,6 @@ mod helpers;
 #[unsafe(no_mangle)]
 extern "C" fn _kmain() -> ! {
   debugln!("Entered _kmain");
-
-  #[allow(unconditional_panic)]
-  let x = 12 / 0;
   
   loop {}
 }
