@@ -14,7 +14,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod bootinfo;
-pub mod sysinfo;
+use core::ffi::c_void;
 
-pub const UEFI_KERNEL_MEM_TYPE: u32 = 0x7353439A;
+use x86_64::instructions::interrupts;
+
+use crate::debugln;
+
+unsafe extern "C" {
+  static STACK_TOP: *const c_void; 
+}
+
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".kentry")]
+unsafe extern "C" fn _kentry() -> ! {
+  loop {}
+  debugln!("Kernel entry (x86_64)");
+  
+  interrupts::disable();
+  debugln!("Disabled interrupts");
+  
+  core::arch::asm!(
+    "mov {}, rsp",
+    in(reg) STACK_TOP
+  );
+  debugln!("Initialised stack");
+
+  super::gdt::load_gdt();
+  super::int::load_interrupts();
+  interrupts::enable();
+  debugln!("Enabled interrupts");
+
+  crate::_kmain();
+}

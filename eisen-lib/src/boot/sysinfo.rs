@@ -46,6 +46,14 @@ pub struct SysGraphicsInfo {
   pub pixel_info:       u8
 }
 
+#[repr(u8)]
+pub enum PixelFormat {
+  RedGreenBlue  = 0,
+  BlueGreenRed  = 1,
+  Bitmask       = 2,
+  BltOnly       = 3
+}
+
 impl SysGraphicsInfo {
   pub const fn new() -> Self {
     Self {
@@ -53,20 +61,22 @@ impl SysGraphicsInfo {
       framebuffer_size: 0,
       resolution:       (0, 0),
       pixels_per_line:  0,
-      pixel_info:       0
+      pixel_info:       3
     }
   }
 }
 
 #[derive(Debug)]
 pub struct SysMemInfo {
-
+  pub map_base:         *const u8,
+  pub map_size:         usize,
 }
 
 impl SysMemInfo {
   pub const fn new() -> Self {
     Self {
-      
+      map_base:         0 as *const u8,
+      map_size:         0
     }
   }
 }

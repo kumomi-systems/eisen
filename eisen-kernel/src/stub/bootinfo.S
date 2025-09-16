@@ -16,7 +16,7 @@
 
 .code64
 
-.section .bootinfo, "adw"
+.section .bootinfo, "a"
 .global bootinfo_start
 
 .equ SECTION_SIZE,        0x40
@@ -28,7 +28,7 @@
 
 .equ KERNEL_TYPE_FLAT,    0
 .equ KERNEL_TYPE_ELF,     1
-.equ KERNEL_TYPE,         KERNEL_TYPE_ELF
+.equ KERNEL_TYPE,         KERNEL_TYPE_FLAT
 
 .equ MAJOR_VERSION,       0
 .equ MINOR_VERSION,       1
@@ -79,7 +79,7 @@ bootinfo_start:
   .quad   _kargs                          # Address of kernel args
   .quad   _ksysinfo                       # Address of system information
   .quad   STUB_END                        # End of stub / beginning of ELF header
-  .quad   KERNEL_VMA                      # Kernel Virtual Memory Address 
+  .quad   KERNEL_START                    # Address to load the kernel to
   .quad   KERNEL_SIZE                     # Size of the kernel
   .quad   STACK_TOP                       # Top of the stack
   .balign SECTION_SIZE, SPACE             # Reserved

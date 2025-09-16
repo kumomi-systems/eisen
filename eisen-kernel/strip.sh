@@ -1,7 +1,8 @@
 #!/bin/bash
 
 STUB=$1
-KERNEL_ELF=$2
+KERNEL=$2
+KERNEL_ELF=$3
 
 # Extract binary stub
 objcopy                 \
@@ -16,5 +17,6 @@ objcopy                 \
   -R .mbrtrap           \
   -R .bootinfo          \
   -R .late_discard      \
-  -F elf64-x86-64       \
-  $KERNEL_ELF
+  -I elf64-x86-64       \
+  -O binary             \
+  $KERNEL_ELF $KERNEL

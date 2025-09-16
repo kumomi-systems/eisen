@@ -16,7 +16,7 @@
 
 
 use eisen_lib::boot::sysinfo::*;
-use uefi::{proto::console::gop::GraphicsOutput, Identify};
+use uefi::{boot::{memory_map, MemoryType}, mem::memory_map::{MemoryMap, MemoryMapOwned}, proto::console::gop::GraphicsOutput, Identify};
 use uefi_raw::{protocol::console::{GraphicsOutputModeInformation, GraphicsOutputProtocol}, table::system::SystemTable};
 
 pub unsafe fn load_system_information() -> SysInfo {
@@ -40,10 +40,10 @@ unsafe fn load_graphics_information(systable: &SystemTable) -> SysGraphicsInfo {
     &mut gop as *mut _ as *mut *mut core::ffi::c_void
   );
 
-  let mut best_ratio: f32                 = 0.0;
-  let mut best_resolution: u64            = 0;
-  let mut best_mode: u32                  = (*(*gop).mode).mode;
-  let mut info_size: usize                = size_of::<GraphicsOutputModeInformation>();
+  let mut best_ratio: f32                   = 0.0;
+  let mut best_resolution: u64              = 0;
+  let mut best_mode: u32                    = (*(*gop).mode).mode;
+  let mut info_size: usize                  = size_of::<GraphicsOutputModeInformation>();
   let mut info: *const GraphicsOutputModeInformation = 0 as *mut _;
   for x in 0..(*(*gop).mode).max_mode {
     if ((*gop).query_mode)(
@@ -63,9 +63,9 @@ unsafe fn load_graphics_information(systable: &SystemTable) -> SysGraphicsInfo {
         mode_ratio >= best_ratio          &&
         mode_ratio <= 16.0/9.0
       {
-        best_mode = x;
+        best_mode       = x;
         best_resolution = mode_resolution;
-        best_ratio = mode_ratio;
+        best_ratio      = mode_ratio;
       }
     }
   }
@@ -82,7 +82,17 @@ unsafe fn load_graphics_information(systable: &SystemTable) -> SysGraphicsInfo {
 }
 
 unsafe fn load_memory_information() -> SysMemInfo {
-  SysMemInfo {
+  let memmap = memory_map(MemoryType::LOADER_DATA).unwrap();
 
+  SysMemInfo {
+    map_base: memmap.buffer().as_ptr(),
+    map_size: memmap.len()
+  }
+}
+
+pub unsafe fn reload_memory_information(meminfo: &mut SysMemInfo, memmap: &MemoryMapOwned) {
+  *meminfo = SysMemInfo {
+    map_base: memmap.buffer().as_ptr(),
+    map_size: memmap.len()
   }
 }

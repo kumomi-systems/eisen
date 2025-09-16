@@ -16,10 +16,10 @@
 
 use eisen_lib::boot::bootinfo::BootInfo;
 use elf::{abi::PT_LOAD, endian::NativeEndian, ElfBytes};
-use uefi::{boot::{allocate_pages, PAGE_SIZE}, println, Status};
+use uefi::{boot::{allocate_pages, MemoryDescriptor, PAGE_SIZE}, println, Status};
 use wakatiwai_udive::boot::BootDriverArgs;
 
-pub fn load_elf_kernel(args: &BootDriverArgs, bootinfo: &BootInfo) -> Option<Status> {
+pub fn boot(args: &BootDriverArgs, bootinfo: &BootInfo) -> Option<Status> {
   let kernel_elf: ElfBytes<NativeEndian>;
   match ElfBytes::<NativeEndian>::minimal_parse(
     &args.img[bootinfo.stub_end as usize..]
@@ -57,16 +57,16 @@ pub fn load_elf_kernel(args: &BootDriverArgs, bootinfo: &BootInfo) -> Option<Sta
   }
 
   unsafe {
-    *(bootinfo.ksysinfo.as_ptr()) = crate::sysinfo::load_system_information();
-
-    println!("Jumping to kernel entry point @ {:#010X}...", kernel_elf.ehdr.e_entry);
-    let _ = uefi::boot::exit_boot_services(uefi::boot::MemoryType::LOADER_DATA);
-    core::arch::asm!(
-      r#"
-        call {}
-      "#,
-      in(reg) kernel_elf.ehdr.e_entry,
-    );
+    // let sysinfo = crate::sysinfo::load_system_information();
+    // crate::paging::enable_paging(bootinfo);
+    // // *(bootinfo.ksysinfo.as_ptr()) = sysinfo;
+    // core::arch::asm!(
+    //   r#"
+    //     call {}
+    //   "#,
+    //   in(reg) kernel_elf.ehdr.e_entry,
+    // );
+    todo!()
   }
 
   unreachable!()

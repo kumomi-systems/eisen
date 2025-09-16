@@ -20,7 +20,8 @@
 
 extern crate alloc;
 
-mod elf;
+mod boot_strategy;
+mod paging;
 mod sysinfo;
 
 use eisen_lib::boot::bootinfo::{BootInfo, KernelType};
@@ -60,11 +61,11 @@ fn main(args: &BootDriverArgs) -> Option<Status> {
   println!("  Stub End:     {:#X}", bootinfo.stub_end.abs_diff(0));
 
   match bootinfo.kernel_type {
-    KernelType::Elf => {
-      elf::load_elf_kernel(args, &bootinfo)
+    KernelType::Flat => {
+      boot_strategy::flat::boot(args, &bootinfo)
     }
-    _ => {
-      todo!()
+    KernelType::Elf => {
+      boot_strategy::elf::boot(args, &bootinfo)
     }
   }
 }

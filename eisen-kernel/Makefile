@@ -21,6 +21,7 @@ TARGET            := $(HERE)/target
 STUB							:= $(BIN)/stub.bin
 KERNEL_ELF        := $(BIN)/kernel.elf
 KERNEL_BIN        := $(BIN)/kernel.bin
+KERNEL						:= $(BIN)/kernel
 
 CARGO             := cargo build
 CARGO_BUILD_OPTS  := --artifact-dir $(BIN) -Zunstable-options
@@ -36,10 +37,10 @@ LD_OPTS           := --script=linker.ld -static -Bsymbolic -nostdlib
 
 all: kernel-asm kernel-rust
 	$(LD) $(LD_OPTS) $(shell find $(BIN) -name "*.[oa]") -o $(KERNEL_ELF)
-	$(HERE)/strip.sh $(STUB) $(KERNEL_ELF)
+	$(HERE)/strip.sh $(STUB) $(KERNEL_BIN) $(KERNEL_ELF)
 	$(HERE)/sign.sh $(STUB)
-	cat $(STUB)				>  $(KERNEL_BIN)
-	cat $(KERNEL_ELF) >> $(KERNEL_BIN)
+	cat $(STUB)				>  $(KERNEL)
+	cat $(KERNEL_BIN) >> $(KERNEL)
 
 clean:
 	rm -rf $(TARGET)

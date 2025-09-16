@@ -69,7 +69,7 @@ umount $EFI_PART
 
 # Install OS
 mount $EISEN_PART $MNTPNT
-cp $BIN/kernel.bin $MNTPNT/kernel
+cp $BIN/kernel $MNTPNT/kernel
 tree $MNTPNT
 umount $EISEN_PART
 

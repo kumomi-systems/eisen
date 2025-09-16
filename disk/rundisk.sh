@@ -26,5 +26,5 @@ qemu-system-x86_64          \
   -vga std                  \
   -enable-kvm               \
 	-cpu host                 \
-  -m 4G                     \
+  -m 8G                     \
   -debugcon stdio

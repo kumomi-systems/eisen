@@ -17,7 +17,7 @@
 OUTPUT_FORMAT(elf64-x86-64)
 ENTRY(_kentry)
 
-KERNEL_VMA        = 0x10000000;
+KERNEL_OFFSET   = 0xFFFFFFFF80000000;
 
 SECTIONS
 {
@@ -30,34 +30,37 @@ SECTIONS
   }
   STUB_END      = .;
 
-  .             = KERNEL_VMA;
-  .             += STUB_END;
+  .             = ALIGN(4K);
+  KERNEL_LMA    = .;
+
+  .             = KERNEL_OFFSET;
+  KERNEL_VMA    = .;
   KERNEL_START  = .;
-  .kentry   ALIGN(4K)     : AT (ADDR (.kentry) - KERNEL_VMA) {
-    *(.kentry.entry)
+
+  .kentry   ALIGN(4K)     : AT (KERNEL_LMA) {
     *(.kentry)
   }
-  .kdata    ALIGN(4K)     : AT (ADDR (.kdata)  - KERNEL_VMA) {
+  .kdata    ALIGN(4K)     : {
     *(.kdata)
   }
-  .text     ALIGN(4K)     : AT (ADDR (.text)   - KERNEL_VMA) {
+  .text     ALIGN(4K)     : {
     *(.text)
     *(.text.*)
   }
-  .rodata   ALIGN(4K)     : AT (ADDR (.rodata) - KERNEL_VMA) {
+  .rodata   ALIGN(4K)     : {
     *(.rodata)
     *(.rodata.*)
   }
-  .data     ALIGN(4K)     : AT (ADDR (.data)   - KERNEL_VMA) {
+  .data     ALIGN(4K)     : {
     *(.data)
     *(.data.*)
   }
-  .bss      ALIGN(4K)     : AT (ADDR (.bss)    - KERNEL_VMA) {
+  .bss      ALIGN(4K)     : {
     *(.bss)
     *(.bss.*)
+    *(.paging)
     *(COMMON)
   }
-
   KERNEL_SIZE   = . - KERNEL_START;
 
   .late_discard : {

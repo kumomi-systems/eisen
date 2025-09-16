@@ -14,7 +14,4 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod bootinfo;
-pub mod sysinfo;
-
-pub const UEFI_KERNEL_MEM_TYPE: u32 = 0x7353439A;
+mod font;
