@@ -8,8 +8,10 @@ crate-type = ["staticlib"]
 test = false
 bench = false
 
+[workspace]
+members = ["src/stub"]
+
 [dependencies]
-crc = "3.4.0"
 x86_64 = { version = "0.15.2", features = ["instructions", "abi_x86_interrupt"] }
 
 [build-dependencies]

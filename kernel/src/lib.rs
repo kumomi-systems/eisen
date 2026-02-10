@@ -30,7 +30,6 @@ mod kdata;
 mod helpers;
 
 pub mod debug;
-pub mod stub;
 
 #[unsafe(no_mangle)]
 extern "C" fn _kmain() -> ! {

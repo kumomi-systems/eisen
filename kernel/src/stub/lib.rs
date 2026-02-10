@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+#![no_std]
+
 #[cfg(feature = "alloc")]
 extern crate alloc;
 #[cfg(feature = "alloc")]
@@ -21,11 +23,31 @@ use alloc::{string::String, vec::Vec, format};
 
 use crc::{self, CRC_32_ISO_HDLC};
 
+pub type StubBuffer = [u8; STUB_SIZE];
+pub const fn new_stub_buffer() -> StubBuffer {
+  [0 as u8; STUB_SIZE]
+}
+
+impl From<StubBuffer> for Stub {
+  fn from(value: StubBuffer) -> Self {
+    unsafe {
+      core::mem::transmute::<StubBuffer, Self>(value)
+    }
+  }
+}
+
+pub const STUB_SIZE:        usize = size_of::<Stub>();
+pub const PMBR_SIZE:        usize = size_of::<PMBR>();
+pub const BOOT_INFO_SIZE:   usize = size_of::<BootInfo>();
+pub const BOOT_INFO_OFFSET: usize = PMBR_SIZE;
+
 #[repr(C, packed)]
 pub struct Stub {
-  pmbr: [u8; 0x200],
+  pmbr: PMBR,
   bi:   BootInfo
 }
+
+pub type PMBR = [u8; 0x200];
 
 #[derive(Clone, Copy, Debug)]
 #[repr(C, packed)]
@@ -80,16 +102,6 @@ pub struct BootInfo {
   pub magic_end:      [u8; 8]
 }
 
-pub type BootInfoByteArray = [u8; size_of::<BootInfo>()];
-pub trait New: Sized {
-  fn new() -> Self;
-}
-impl New for BootInfoByteArray {
-  fn new() -> Self {
-    [0 as u8; size_of::<Self>()]
-  }
-}
-
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
 pub enum KernelType {
@@ -124,10 +136,10 @@ impl BootInfo {
   
   pub const CRC32_HASHER: crc::Crc<u32>  = crc::Crc::<u32>::new(&CRC_32_ISO_HDLC);
 
-  pub fn parse(buffer: BootInfoByteArray) -> Result<Self, BootInfoInvalidError> {
+  pub fn parse(buffer: Stub) -> Result<Self, BootInfoInvalidError> {
     // Read from buffer
     let mut ret = unsafe {
-      core::mem::transmute::<BootInfoByteArray, Self>(buffer)
+      *core::mem::transmute::<*const Stub, *const Self>((&buffer as *const Stub).add(PMBR_SIZE))
     };
 
     match ret.validate() {
@@ -173,7 +185,7 @@ impl BootInfo {
     // Compare CRC32 checksums
     patient.checksum          = 0;
     if Self::CRC32_HASHER.checksum(
-      &unsafe { core::mem::transmute::<Self, BootInfoByteArray>(patient) }
+      &unsafe { core::mem::transmute::<Self, [u8; size_of::<BootInfo>()]>(patient) }
     ) != self.checksum {
       return Some(BootInfoInvalidError::Hash);
     }
@@ -246,5 +258,13 @@ impl BootInfo {
     }
 
     format!("{}{}", kernel_size_adjusted, kernel_size_unit)
+  }
+}
+
+impl From<StubBuffer> for BootInfo {
+  fn from(value: StubBuffer) -> Self {
+    unsafe {
+      *core::mem::transmute::<*const u8, *const Self>((&value as *const u8).add(PMBR_SIZE))
+    }
   }
 }

@@ -19,6 +19,7 @@
 
 mod fs;
 
+use eisen_kernel_stub::*;
 use uefi::{CStr16, prelude::*};
 use uefi::proto::{console::text::Output};
 
@@ -32,10 +33,16 @@ fn main() -> Status {
 	uefi::println!("Eisen NativeBoot version {}", env!("CARGO_PKG_VERSION"));
 
 	let mut kernel = fs::get_kernel_file();
-	let mut kernel_hdr: [u8; 0x400] = [0; 0x400];
+	let mut kernel_stub_buf = new_stub_buffer();
+	match kernel.read(&mut kernel_stub_buf) {
+		Ok(ok) => {
+			if ok < STUB_SIZE { panic!("Read {} bytes of kernel stub, expected {}", ok, STUB_SIZE) }
+		}
+		Err(err) => { panic!("Reading kernel stub: {}", err) }
+	}
 
-	let _ = kernel.read(&mut kernel_hdr).unwrap();
-	uefi::println!("{:X?}", kernel_hdr);
+	let kernel_bi = BootInfo::from(kernel_stub_buf);
+	uefi::println!("{:?}", kernel_bi);
 
 	loop {}
 	Status::SUCCESS
