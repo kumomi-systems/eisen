@@ -14,7 +14,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-HERE              := $(RT)/eisen-kernel
+HERE              := $(RT)/kernel
 SRC               := $(HERE)/src
 TARGET            := $(HERE)/target
 
@@ -34,10 +34,10 @@ LD_OPTS           := --script=linker.ld -static -Bsymbolic -nostdlib
 .SILENT:
 .PHONY: clean
 
-all: kernel-asm kernel-rust
+all: kernel-rust
 	$(LD) $(LD_OPTS) $(shell find $(BIN) -name "*.[oa]") -o $(KERNEL_ELF)
-	$(HERE)/strip.sh $(STUB) $(KERNEL_ELF)
-	$(HERE)/sign.sh $(STUB)
+	bash -c "$(HERE)/strip.sh $(STUB) $(KERNEL_ELF)"
+	bash -c "$(HERE)/sign.sh $(STUB)"
 	cat $(STUB)				>  $(KERNEL_BIN)
 	cat $(KERNEL_ELF) >> $(KERNEL_BIN)
 
@@ -47,6 +47,8 @@ clean:
 kernel-asm: $(shell find $(SRC) -name "*.S")
 	$(AS) $(AS_OPTS) $^ -o $(BIN)/kernel_asm.o
 
-kernel-rust:
+kernel-rust: kernel-asm
 	$(CARGO) $(CARGO_BUILD_OPTS)
+
+	# -Clink-arg=$(BIN)/kernel_asm.o
 	

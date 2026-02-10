@@ -14,7 +14,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ "$(id -u)" -ne 0 ]; then
 	echo "This script must be run as root." 1>&2
@@ -53,23 +53,22 @@ mkdir -p $MNTPNT
 
 # Create file systems
 mkfs.fat -F 32 -n "SYSEFI"  $EFI_PART
-mkfs.fat -F 32 -n "EISEN"   $EISEN_PART
+mkfs.ext4 -L 			"EISEN"   $EISEN_PART
 
 # Wait for the build process to finish before populating the disk
 wait $BUILD_PID
 
-# Install bootloader
+# Populate boot partition
 mount $EFI_PART $MNTPNT
-wakatiwai-install $MNTPNT $DSK/wakatiwai/driverlist
-mkdir $MNTPNT/EFI/BOOT
-mv $MNTPNT/EFI/wakatiwai/wakatiwai.efi $MNTPNT/EFI/BOOT/BOOTX64.EFI
-cp $DSK/wakatiwai/wtconfig.json $MNTPNT/EFI/wakatiwai/wtconfig.json
+mkdir -p $MNTPNT/EFI/BOOT
+cp $BIN/eisen-boot.efi $MNTPNT/EFI/BOOT/BOOTX64.EFI
+mkdir -p $MNTPNT/eisen
+cp $BIN/kernel.bin $MNTPNT/eisen/kernel
 tree $MNTPNT
 umount $EFI_PART
 
-# Install OS
+# Populate OS partition
 mount $EISEN_PART $MNTPNT
-cp $BIN/kernel.bin $MNTPNT/kernel
 tree $MNTPNT
 umount $EISEN_PART
 

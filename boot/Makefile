@@ -14,23 +14,21 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-HERE              := $(RT)/eisen-lib
+HERE              := $(RT)/boot
 SRC               := $(HERE)/src
 TARGET            := $(HERE)/target
 
-LIB               := $(BIN)/eisenlib
-
-CARGO             := cargo
+CARGO             := cargo build
 CARGO_BUILD_OPTS  := --artifact-dir $(BIN) -Zunstable-options
 
 .SILENT:
 .PHONY: clean
 
-all: lib
+all: boot
 
 clean:
-	rm -rf $(TARGET) $(KERNEL)
+	rm -rf $(TARGET)
 
-lib:
-	$(CARGO) build $(CARGO_BUILD_OPTS)
+boot:
+	$(CARGO) $(CARGO_BUILD_OPTS)
 	

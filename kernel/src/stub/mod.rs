@@ -20,7 +20,12 @@ extern crate alloc;
 use alloc::{string::String, vec::Vec, format};
 
 use crc::{self, CRC_32_ISO_HDLC};
-use uuid::{uuid, Uuid};
+
+#[repr(C, packed)]
+pub struct Stub {
+  pmbr: [u8; 0x200],
+  bi:   BootInfo
+}
 
 #[derive(Clone, Copy, Debug)]
 #[repr(C, packed)]
@@ -46,8 +51,8 @@ pub struct BootInfo {
   pub uuid0:          u16,
       res_s0_0:       [u8; 6],
   pub kentry:         core::ptr::NonNull<extern "C" fn () -> !>,
-  pub kargs:          core::ptr::NonNull<&'static [u8; 0x400]>,
-  pub ksysinfo:       core::ptr::NonNull<crate::boot::sysinfo::SysInfo>,
+  pub kargs:          core::ptr::NonNull<()>,
+  pub ksysinfo:       core::ptr::NonNull<()>,
   pub stub_end:       u64,
   pub kernel_vma:     u64,
   pub kernel_size:    u64,
@@ -74,7 +79,16 @@ pub struct BootInfo {
   pub checksum:       u32,
   pub magic_end:      [u8; 8]
 }
+
 pub type BootInfoByteArray = [u8; size_of::<BootInfo>()];
+pub trait New: Sized {
+  fn new() -> Self;
+}
+impl New for BootInfoByteArray {
+  fn new() -> Self {
+    [0 as u8; size_of::<Self>()]
+  }
+}
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
@@ -95,7 +109,13 @@ pub enum BootInfoInvalidError {
 impl BootInfo {
   const MAGIC_START:  [u8; 6]         = *b"Eisen\0";
   const MAGIC_END:    [u8; 8]         = *b"InfoEnd\x1A";
-  const EISEN_UUID:   Uuid            = uuid!("94595C96-BD12-40E1-A7FB-61C50F3DCA9A");
+  const EISEN_UUID:   [u8; 16]        =   // 94595C96-BD12-40E1-A7FB-61C50F3DCA9A
+    [ 0x94, 0x59, 0x5C, 0x96,             // 94595C96
+      0xBD, 0x12,                         // BD12
+      0x40, 0xE1,                         // 40E1
+      0xA7, 0xFB,                         // A7FB
+      0x61, 0xC5, 0x0F, 0x3D, 0xCA, 0x9A  // 61C50F3DCA9A
+    ];
 
   pub const VERSION_FLAG_ALPHA: u8  = 0b00000001;
   pub const VERSION_FLAG_BETA:  u8  = 0b00000010;
@@ -130,7 +150,7 @@ impl BootInfo {
     }
 
     // Check signature
-    if Uuid::from_bytes(patient.install_uuid) == Uuid::nil() {
+    if patient.install_uuid == [0; 16] {
       return Some(BootInfoInvalidError::Unsigned);
     }
 
@@ -146,7 +166,7 @@ impl BootInfo {
       *(uuid_buffer.as_mut_ptr().add(0x0C) as *mut u16) = self.uuid6.to_be();
       *(uuid_buffer.as_mut_ptr().add(0x0E) as *mut u16) = self.uuid7.to_be();
     }
-    if Uuid::from_bytes(uuid_buffer) != Self::EISEN_UUID {
+    if uuid_buffer != Self::EISEN_UUID {
       return Some(BootInfoInvalidError::EisenUUID);
     }
 

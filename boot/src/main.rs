@@ -14,5 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod bootinfo;
-pub mod sysinfo;
+#![no_main]
+#![no_std]
+
+mod fs;
+
+use uefi::{CStr16, prelude::*};
+use uefi::proto::{console::text::Output};
+
+const KERNEL_FILE_PATH: &CStr16 = cstr16!("eisen\\kernel");
+
+#[entry]
+fn main() -> Status {
+	// Basic init
+	uefi::helpers::init().unwrap();
+	let _ = uefi::system::with_stdout(Output::clear);
+	uefi::println!("Eisen NativeBoot version {}", env!("CARGO_PKG_VERSION"));
+
+	let mut kernel = fs::get_kernel_file();
+	let mut kernel_hdr: [u8; 0x400] = [0; 0x400];
+
+	let _ = kernel.read(&mut kernel_hdr).unwrap();
+	uefi::println!("{:X?}", kernel_hdr);
+
+	loop {}
+	Status::SUCCESS
+}

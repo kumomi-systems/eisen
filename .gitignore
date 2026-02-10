@@ -1,4 +1,5 @@
 # IDE directories
+.direnv/
 .vscode/
 
 # Binaries

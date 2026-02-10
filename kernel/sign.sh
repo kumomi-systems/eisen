@@ -14,13 +14,13 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#!/bin/bash
+#!/usr/bin/env bash
 
 STUB=$1
 BIHEADER=$STUB.biheader
 STUBTMP=$STUB.tmp
 
-echo "Signing kernel stub $STUB..."
+echo "Signing kernel stub $STUB ..."
 
 BOOTINFO_SIZE=512
 BOOTINFO_OFFSET=512

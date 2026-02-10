@@ -15,8 +15,26 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #![no_std]
+#![no_main]
 
-#[cfg(feature = "alloc")]
-extern crate alloc;
+#![feature(
+  abi_x86_interrupt
+)]
 
-pub mod boot;
+#![allow(
+  unsafe_op_in_unsafe_fn
+)]
+
+mod arch;
+mod kdata;
+mod helpers;
+
+pub mod debug;
+pub mod stub;
+
+#[unsafe(no_mangle)]
+extern "C" fn _kmain() -> ! {
+  debugln!("Entered _kmain");
+  
+  loop {}
+}
