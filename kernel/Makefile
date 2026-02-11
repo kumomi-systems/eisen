@@ -49,6 +49,4 @@ kernel-asm: $(shell find $(SRC) -name "*.S")
 
 kernel-rust: kernel-asm
 	$(CARGO) $(CARGO_BUILD_OPTS)
-
-	# -Clink-arg=$(BIN)/kernel_asm.o
 	

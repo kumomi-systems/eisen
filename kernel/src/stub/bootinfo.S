@@ -30,10 +30,6 @@
 .equ KERNEL_TYPE_ELF,     1
 .equ KERNEL_TYPE,         KERNEL_TYPE_ELF
 
-.equ MAJOR_VERSION,       0
-.equ MINOR_VERSION,       1
-.equ PATCH_VERSION,       0
-
 .equ VERSION_FLAG_ALPHA,  0b00000001  # Alpha release
 .equ VERSION_FLAG_BETA,   0b00000010  # Beta release
 .equ VERSION_FLAG_RC,     0b00000100  # Release candidate
@@ -41,6 +37,9 @@
 
 .equ VERSION_FLAGS,       0 | VERSION_FLAG_ALPHA
 
+.extern KERNEL_MAJOR_VERSION
+.extern KERNEL_MINOR_VERSION
+.extern KERNEL_PATCH_VERSION
 .extern _kentry
 .extern _kargs
 .extern _ksysinfo
@@ -63,9 +62,9 @@ bootinfo_start:
   .space  0x2, PLACEHOLDER                # Year built
   .space  0x1, PLACEHOLDER                # Month built
   .space  0x1, PLACEHOLDER                # Day built
-  .byte   MAJOR_VERSION                   # Major Version
-  .byte   MINOR_VERSION                   # Minor Version
-  .byte   PATCH_VERSION                   # Patch Version
+  .byte   KERNEL_MAJOR_VERSION            # Major Version
+  .byte   KERNEL_MINOR_VERSION            # Minor Version
+  .byte   KERNEL_PATCH_VERSION            # Patch Version
   .byte   VERSION_FLAGS                   # Version Flags
   .align  0x10
   .asciz  "Hydrogen"                      # Version name
