@@ -7,6 +7,10 @@ edition = "2024"
 crate-type = ["lib"]
 path = "lib.rs"
 
+[features]
+default_features = []
+alloc = []
+
 [dependencies]
 crc = "3.4.0"
 

@@ -14,11 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+use uefi::CStr16;
 use uefi::boot::ScopedProtocol;
 use uefi::proto::media::file::{Directory, File, FileAttribute, FileMode, RegularFile};
 use uefi::proto::media::fs::SimpleFileSystem;
 
-pub fn get_kernel_file() -> RegularFile {
+pub fn read_file(path: &CStr16, mode: FileMode) -> Option<RegularFile> {
 	let mut bootfs: ScopedProtocol<SimpleFileSystem>;
   match uefi::boot::get_image_file_system(uefi::boot::image_handle()) {
     Ok(ok)    => {
@@ -30,18 +31,18 @@ pub fn get_kernel_file() -> RegularFile {
   let mut bootdir: Directory;
   match bootfs.open_volume() {
     Ok(ok)    => { bootdir = ok; }
-    Err(err)  => { panic!("Opening boot directory: {}", err); }
+    Err(err)  => { panic!("Opening root directory: {}", err); }
   }
 
-  let kernel: RegularFile;
   match bootdir.open(
-    crate::KERNEL_FILE_PATH,
-    FileMode::Read,
-    FileAttribute::READ_ONLY
+    path,
+    mode,
+    FileAttribute::empty()
   ) {
-    Ok(ok)    => { kernel = ok.into_regular_file().unwrap(); }
-    Err(err)  => { panic!("Opening kernel file: {}", err); }
+    Ok(ok)    => {
+      if ok.is_directory().unwrap() { None }
+      else { Some(ok.into_regular_file().unwrap()) }
+    }
+    Err(_)    => { None }
   }
-
-  return kernel;
 }

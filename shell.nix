@@ -4,10 +4,10 @@ let
     "./kernel/strip.sh"
   ];
   rust-overlay = builtins.fetchTarball "https://github.com/oxalica/rust-overlay/archive/master.tar.gz";
+  toolchain = pkgs.rust-bin.fromRustupToolchainFile ./toolchain.toml;
   pkgs = import <nixpkgs> {
     overlays = [(import rust-overlay)];
   };
-  toolchain = pkgs.rust-bin.fromRustupToolchainFile ./toolchain.toml;
 in pkgs.mkShell {
   buildInputs = with pkgs; [
     toolchain

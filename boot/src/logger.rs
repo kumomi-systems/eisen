@@ -14,29 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#![no_main]
-#![no_std]
+pub const LOGLEVEL_QUIET:   usize = 0;
+pub const LOGLEVEL_NORMAL:  usize = 1;
+pub const LOGLEVEL_VERBOSE: usize = 2;
 
-mod config;
-mod fs;
-mod kernel;
-mod logger;
-
-use uefi::prelude::*;
-use uefi::proto::{console::text::Output};
-
-#[entry]
-fn main() -> Status {
-	// Basic init
-	uefi::helpers::init().unwrap();
-	let _ = uefi::system::with_stdout(Output::clear);
-	uefi::println!("Eisen NativeBoot version {}", env!("CARGO_PKG_VERSION"));
-
-	config::load_config();
-	let mut kernel	= kernel::read_file();
-	let bi					= kernel::get_boot_info(&kernel::read_stub_buffer(&mut kernel));
-	kernel::print_boot_info(&bi);
-	
-	loop {}
-	Status::SUCCESS
+#[macro_export]
+macro_rules! log {
+  () => {
+    uefi::println!();
+  };
+  ($level:ident, $($arg:tt)*) => {
+    if $level <= crate::config::CONFIG.get().unwrap().loglevel {
+      uefi::println!($($arg)*);
+    }
+	}
 }
