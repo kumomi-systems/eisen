@@ -25,12 +25,7 @@ pub struct DebugWriter;
 impl Write for DebugWriter {
   #[cfg(target_arch = "x86_64")]
   fn write_char(&mut self, c: char) -> Result {
-    let mut buf: [u8; 4] = [0; 4];
-    c.encode_utf8(&mut buf);
-
-    for b in buf {
-      unsafe { outb(&Port::DebugOut, b); }
-    }
+    unsafe { outb(&Port::DebugOut, c as u8); }
 
     Result::Ok(())
   }

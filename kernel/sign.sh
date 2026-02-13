@@ -72,6 +72,7 @@ cat $BIHEADER >> $STUBTMP
 tail -c+$(($BOOTINFO_OFFSET + $BOOTINFO_SIZE)) $STUB >> $STUBTMP
 mv $STUBTMP $STUB
 rm $BIHEADER
-truncate $STUB --size=1K $STUB
+truncate $STUB --size=1K # Removes some random 1A at 0x400 - no clue why it's there in the first place
+truncate $STUB --size=4K
 
 echo "Kernel stub $STUB signed successfully!"

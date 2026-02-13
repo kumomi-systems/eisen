@@ -43,25 +43,10 @@ pub fn load_config<'a>() -> &'a Config {
     None        => { panic!("Failed to open/create config file") }
   }
 
-  let config_file_info: alloc::boxed::Box<FileInfo>;
-  match config_file.get_boxed_info() {
-    Ok(ok)      => { config_file_info = ok; }
-    Err(err)    => { panic!("Failed to determine config file size: {}", err) }
-  }
-
-  let config_file_size = config_file_info.file_size() as usize;
-  let mut config_file_buffer = alloc::vec![0; config_file_size];
-  match config_file.read(&mut config_file_buffer) {
-    Ok(ok)      => {
-      if ok != config_file_size {
-        panic!("Failed to read config file")
-      }
-    }
-    Err(err)    => { panic!("Failed to read config file: {}", err) }
-  }
-
   CONFIG.call_once(|| {
-    toml::from_slice(&config_file_buffer).unwrap_or(DEFAULT_CONFIG)
+    toml::from_slice(
+      &crate::fs::read_contents(&mut config_file)
+    ).unwrap_or(DEFAULT_CONFIG)
   })
 }
 

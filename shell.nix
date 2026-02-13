@@ -1,5 +1,6 @@
 let
   shellScripts = pkgs.lib.strings.concatMapStrings (t: " " + t) [
+    "./kernel/gen-env-linker.sh"
     "./kernel/sign.sh"
     "./kernel/strip.sh"
   ];

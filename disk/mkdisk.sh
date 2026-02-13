@@ -63,7 +63,7 @@ mount $EFI_PART $MNTPNT
 mkdir -p $MNTPNT/EFI/BOOT
 cp $BIN/eisen-boot.efi $MNTPNT/EFI/BOOT/BOOTX64.EFI
 mkdir -p $MNTPNT/eisen
-cp $BIN/kernel.bin $MNTPNT/eisen/kernel
+cp $BIN/kernel $MNTPNT/eisen/kernel
 cp $DSK/bootconfig.toml $MNTPNT/eisen/bootconfig.toml
 tree $MNTPNT
 umount $EFI_PART

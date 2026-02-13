@@ -21,6 +21,7 @@ TARGET            := $(HERE)/target
 STUB							:= $(BIN)/stub.bin
 KERNEL_ELF        := $(BIN)/kernel.elf
 KERNEL_BIN        := $(BIN)/kernel.bin
+KERNEL						:= $(BIN)/kernel
 
 CARGO             := cargo build
 CARGO_BUILD_OPTS  := --artifact-dir $(BIN) -Zunstable-options
@@ -29,17 +30,19 @@ AS                := as
 AS_OPTS           := 
 
 LD                := ld
-LD_OPTS           := --script=linker.ld -static -Bsymbolic -nostdlib
+LD_OPTS           := --script=linker.ld -static -Bsymbolic -nostdlib --output binary
 
 .SILENT:
 .PHONY: clean
 
 all: kernel-rust
-	$(LD) $(LD_OPTS) $(shell find $(BIN) -name "*.[oa]") -o $(KERNEL_ELF)
-	bash -c "$(HERE)/strip.sh $(STUB) $(KERNEL_ELF)"
+	bash -c "$(HERE)/gen-env-linker.sh"
+	$(LD) $(LD_OPTS) $(shell find $(BIN) -name "*.[oa]") -o $(KERNEL_BIN)
+	objdump -xdsZ $(KERNEL_BIN) > $(KERNEL_BIN).dis
+	bash -c "$(HERE)/strip.sh $(STUB) $(KERNEL_BIN)"
 	bash -c "$(HERE)/sign.sh $(STUB)"
-	cat $(STUB)				>  $(KERNEL_BIN)
-	cat $(KERNEL_ELF) >> $(KERNEL_BIN)
+	cat $(STUB)				>  $(KERNEL)
+	cat $(KERNEL_BIN) >> $(KERNEL)
 
 clean:
 	rm -rf $(TARGET)

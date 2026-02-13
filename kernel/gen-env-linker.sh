@@ -16,24 +16,11 @@
 
 #!/usr/bin/env bash
 
-STUB=$1
-KERNEL_ELF=$2
-
-echo "Stripping kernel stub $STUB ..."
-
-# Extract binary stub
-objcopy                 \
-  -j .mbrtrap           \
-  -j .bootinfo          \
-  -I elf64-x86-64       \
-  -O binary             \
-  $KERNEL_ELF $STUB
-
-# Remove unwanted sections
-objcopy                 \
-  -R .mbrtrap           \
-  -R .bootinfo          \
-  -R .late_discard      \
-  -I elf64-x86-64       \
-  -O binary       \
-  $KERNEL_ELF $KERNEL_ELF
+cat Cargo.toml                  | \
+  awk '/^version/{ print $3 }'  | \
+  tr '".' ' '                   | \
+  awk '{
+    print "KERNEL_MAJOR_VERSION = " $1 ";"
+    print "KERNEL_MINOR_VERSION = " $2 ";"
+    print "KERNEL_PATCH_VERSION = " $3 ";"
+  }' > ../bin/env-linker.ld

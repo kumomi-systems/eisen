@@ -18,13 +18,16 @@
 
 RT=$(realpath $(dirname $0)/..)
 
-qemu-system-x86_64          \
-  -L OVMF/                  \
-  -pflash OVMF/OVMF.4m.fd   \
-  -net none                 \
-  -usb $RT/Eisen.img        \
-  -vga std                  \
-  -enable-kvm               \
-	-cpu host                 \
-  -m 4G                     \
-  -debugcon stdio
+qemu-system-x86_64                                  \
+  -L OVMF/                                          \
+  -drive if=pflash,file=OVMF/OVMF.4m.fd,format=raw  \
+  -drive format=raw,file=$RT/Eisen.img              \
+  -net none                                         \
+  -vga std                                          \
+  -enable-kvm                                       \
+	-cpu host                                         \
+  -m 4G                                             \
+  -debugcon stdio                                   \
+  -d int                                            \
+  -no-shutdown                                      \
+  -no-reboot

@@ -21,5 +21,5 @@ mod pic;
 pub unsafe fn load_interrupts() {
   pic::remap(0x20, 0x28);
   idt::load_idt();
-  // pic::disable();
+  pic::disable();
 }

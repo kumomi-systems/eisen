@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use eisen_kernel_stub::*;
+use eisen_kernel_boot::*;
 use uefi::{CStr16, cstr16};
 use uefi::proto::media::file::{FileMode, RegularFile};
 
@@ -68,12 +68,13 @@ pub fn print_boot_info(bi: &BootInfo) {
     kargs:        {:#018X}
     ksysinfo:     {:#018X}
     stack:        {:#018X}
-    VMA:          {:#018X}"#,
+    VMA:          {:#018X}
+    Stub End:     {:#018X}"#,
 	bi.kernel_type(),
 	bi.kentry().addr(),
 	bi.kargs().addr(),
 	bi.ksysinfo().addr(),
 	bi.stack_top(),
-	bi.kernel_vma()
-	)
+	bi.kernel_vma(),
+	bi.stub_end());
 }

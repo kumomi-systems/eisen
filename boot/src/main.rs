@@ -22,8 +22,11 @@ mod fs;
 mod kernel;
 mod logger;
 
+use uefi::boot::{MemoryType, PAGE_SIZE, allocate_pages};
 use uefi::prelude::*;
 use uefi::proto::{console::text::Output};
+
+use crate::logger::LOGLEVEL_VERBOSE;
 
 #[entry]
 fn main() -> Status {
@@ -37,6 +40,41 @@ fn main() -> Status {
 	let bi					= kernel::get_boot_info(&kernel::read_stub_buffer(&mut kernel));
 	kernel::print_boot_info(&bi);
 	
+	let kernel_load_ptr = allocate_pages(
+		boot::AllocateType::Address(bi.kernel_vma()),
+		boot::MemoryType::LOADER_CODE,
+		bi.kernel_size() as usize / PAGE_SIZE
+	).unwrap();
+	log!(LOGLEVEL_VERBOSE, "Allocated {} for the kernel at phys addr {:#018X}", bi.kernel_size_pretty(), kernel_load_ptr.addr());
+	
+	let kernel_buf = crate::fs::read_contents(&mut kernel);
+	let kernel_load_buf = unsafe {
+		core::slice::from_raw_parts_mut(
+			kernel_load_ptr.as_ptr(),
+			kernel_buf.len()
+		)
+	};
+	kernel_load_buf.copy_from_slice(&kernel_buf);
+	log!(LOGLEVEL_VERBOSE, "Loaded Kernel");
+
+	unsafe {
+		let cmdline_bytes = crate::config::CONFIG.get().unwrap().cmdline.as_bytes();
+		if cmdline_bytes.len() > eisen_kernel_data::kargs::KARGS_SIZE {
+			panic!("cmdline exceeds maximum length: must be no greater than {} bytes", eisen_kernel_data::kargs::KARGS_SIZE);
+		}
+		let kargs = core::slice::from_raw_parts_mut(
+			bi.kargs().addr().get() as *mut u8,
+			cmdline_bytes.len()
+		);
+		kargs.copy_from_slice(cmdline_bytes);
+
+		let kentry = bi.kentry().addr().get();
+		log!(LOGLEVEL_VERBOSE, "Jumping to kernel at addr {:#018X}", kentry);
+		let _ = uefi::boot::exit_boot_services(Some(MemoryType::LOADER_DATA));
+		let entry_fn: extern "C" fn() -> ! = core::mem::transmute(kentry);
+		entry_fn();
+	}
+
 	loop {}
 	Status::SUCCESS
 }

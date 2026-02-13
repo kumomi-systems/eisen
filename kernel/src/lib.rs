@@ -26,7 +26,6 @@
 )]
 
 mod arch;
-mod kdata;
 mod helpers;
 
 pub mod debug;
@@ -34,6 +33,8 @@ pub mod debug;
 #[unsafe(no_mangle)]
 extern "C" fn _kmain() -> ! {
   debugln!("Entered _kmain");
-  
+
+  debugln!("{}", eisen_kernel_data::kargs::kargs());
+
   loop {}
 }

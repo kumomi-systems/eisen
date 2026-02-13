@@ -1,8 +1,7 @@
 [package]
 name = "eisen-kernel"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
-build = "build.rs"
 
 [lib]
 crate-type = ["staticlib"]
@@ -10,9 +9,11 @@ test = false
 bench = false
 
 [workspace]
-members = ["src/stub"]
+members = ["src/boot", "src/kdata"]
 
 [dependencies]
+eisen-kernel-data = { path = "src/kdata", features = ["kernel-only"] }
+
 x86_64 = { version = "0.15.2", features = ["instructions", "abi_x86_interrupt"] }
 
 [build-dependencies]

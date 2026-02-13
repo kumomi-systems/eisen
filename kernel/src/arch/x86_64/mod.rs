@@ -31,9 +31,9 @@ unsafe extern "C" {
 
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".kentry.entry")]
-unsafe extern "C" fn _kentry() -> ! {
+unsafe extern "C" fn _kentry() -> u8 {
   debugln!("Kernel entry");
-  
+
   interrupts::disable();
   debugln!("Disabled interrupts");
   

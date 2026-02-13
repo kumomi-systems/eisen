@@ -5,7 +5,8 @@ edition = "2024"
 
 [dependencies]
 uefi = { version = "0.36.1", features = ["alloc", "global_allocator", "panic_handler"] }
-eisen-kernel-stub = { path = "../kernel/src/stub", features = ["alloc"] }
+eisen-kernel-boot = { path = "../kernel/src/boot", features = ["alloc"] }
+eisen-kernel-data = { path = "../kernel/src/kdata", default-features = false }
 toml = { version = "0.9.12", default-features = false, features = ["parse", "serde"] }
 serde = { version = "1.0.228", features = ["alloc", "derive"], default-features = false }
 spin = "0.10.0"

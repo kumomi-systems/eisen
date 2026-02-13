@@ -21,7 +21,7 @@ export BIN  := $(RT)/bin
 .PHONY: clean kernel
 
 all: fresh kernel boot
-	objdump -xDS $(BIN)/kernel.elf > $(BIN)/kernel.elf.dis
+# 	objdump -xDS $(BIN)/kernel.elf > $(BIN)/kernel.elf.dis
 
 clean:
 	rm -rf $(BIN)

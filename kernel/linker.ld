@@ -14,9 +14,8 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-INCLUDE ../bin/environment-linker.ld
+INCLUDE ../bin/env-linker.ld
 
-OUTPUT_FORMAT(elf64-x86-64)
 ENTRY(_kentry)
 
 KERNEL_VMA        = 0x10000000;
@@ -34,27 +33,27 @@ SECTIONS
 
   .             = KERNEL_VMA;
   .             += STUB_END;
-  KERNEL_START  = .;
-  .kentry   ALIGN(4K)     : AT (ADDR (.kentry) - KERNEL_VMA) {
+  .kentry   ALIGN(4K)     : {
+    KERNEL_START  = .;
     *(.kentry.entry)
     *(.kentry)
   }
-  .kdata    ALIGN(4K)     : AT (ADDR (.kdata)  - KERNEL_VMA) {
+  .kdata    ALIGN(4K)     : {
     *(.kdata)
   }
-  .text     ALIGN(4K)     : AT (ADDR (.text)   - KERNEL_VMA) {
+  .text     ALIGN(4K)     : {
     *(.text)
     *(.text.*)
   }
-  .rodata   ALIGN(4K)     : AT (ADDR (.rodata) - KERNEL_VMA) {
+  .rodata   ALIGN(4K)     : {
     *(.rodata)
     *(.rodata.*)
   }
-  .data     ALIGN(4K)     : AT (ADDR (.data)   - KERNEL_VMA) {
+  .data     ALIGN(4K)     : {
     *(.data)
     *(.data.*)
   }
-  .bss      ALIGN(4K)     : AT (ADDR (.bss)    - KERNEL_VMA) {
+  .bss      ALIGN(4K)     : {
     *(.bss)
     *(.bss.*)
     *(COMMON)

@@ -1,0 +1,25 @@
+[package]
+name = "eisen-kernel-boot"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["lib"]
+path = "lib.rs"
+
+[features]
+default_features = []
+alloc = []
+
+[dependencies]
+crc = "3.4.0"
+
+[profile.dev]
+lto = true
+panic = "abort"
+
+[profile.release]
+lto = true
+opt-level = "z"
+panic = "abort"
+strip = true

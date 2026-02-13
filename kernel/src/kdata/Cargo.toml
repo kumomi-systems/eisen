@@ -1,5 +1,5 @@
 [package]
-name = "eisen-kernel-stub"
+name = "eisen-kernel-data"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,8 +8,8 @@ crate-type = ["lib"]
 path = "lib.rs"
 
 [features]
-default_features = []
-alloc = []
+default_features = ["kernel-only"]
+kernel-only = []
 
 [dependencies]
 crc = "3.4.0"

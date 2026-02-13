@@ -14,20 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use std::env;
-use std::fs::File;
-use std::io::Write;
+use core::mem::size_of;
 
-fn main() {
-  let mut file = File::create("../bin/environment-linker.ld").unwrap();
-  file.write_all(format!(
-    r#"
-KERNEL_MAJOR_VERSION = {};
-KERNEL_MINOR_VERSION = {};
-KERNEL_PATCH_VERSION = {};
-    "#,
-    env!("CARGO_PKG_VERSION_MAJOR"),
-    env!("CARGO_PKG_VERSION_MINOR"),
-    env!("CARGO_PKG_VERSION_PATCH")
-  ).as_bytes()).unwrap();
+pub struct SysInfo {
+  
+}
+
+#[allow(non_upper_case_globals)]
+#[unsafe(no_mangle)]
+#[unsafe(link_section = ".kdata")]
+#[used]
+static _ksysinfo: [u8; size_of::<SysInfo>()] = [0; size_of::<SysInfo>()];
+
+#[cfg(feature = "kernel-only")]
+pub fn ksysinfo() -> &'static SysInfo {
+  unsafe {
+    (&_ksysinfo as *const [u8; size_of::<SysInfo>()] as *const SysInfo).as_ref().unwrap()
+  }
 }

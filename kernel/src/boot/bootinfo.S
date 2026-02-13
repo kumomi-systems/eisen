@@ -28,7 +28,7 @@
 
 .equ KERNEL_TYPE_FLAT,    0
 .equ KERNEL_TYPE_ELF,     1
-.equ KERNEL_TYPE,         KERNEL_TYPE_ELF
+.equ KERNEL_TYPE,         KERNEL_TYPE_FLAT
 
 .equ VERSION_FLAG_ALPHA,  0b00000001  # Alpha release
 .equ VERSION_FLAG_BETA,   0b00000010  # Beta release

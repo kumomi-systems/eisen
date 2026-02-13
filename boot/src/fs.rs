@@ -14,9 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+extern crate alloc;
+
 use uefi::CStr16;
 use uefi::boot::ScopedProtocol;
-use uefi::proto::media::file::{Directory, File, FileAttribute, FileMode, RegularFile};
+use uefi::proto::media::file::{Directory, File, FileAttribute, FileInfo, FileMode, RegularFile};
 use uefi::proto::media::fs::SimpleFileSystem;
 
 pub fn read_file(path: &CStr16, mode: FileMode) -> Option<RegularFile> {
@@ -45,4 +47,26 @@ pub fn read_file(path: &CStr16, mode: FileMode) -> Option<RegularFile> {
     }
     Err(_)    => { None }
   }
+}
+
+pub fn read_contents(file: &mut RegularFile) -> alloc::vec::Vec<u8> {
+  let file_info: alloc::boxed::Box<FileInfo>;
+  match file.get_boxed_info() {
+    Ok(ok)      => { file_info = ok; }
+    Err(err)    => { panic!("Failed to determine file size: {}", err) }
+  }
+
+  file.set_position(0);
+  let file_size = file_info.file_size() as usize;
+  let mut file_buffer = alloc::vec![0; file_size];
+  match file.read(&mut file_buffer) {
+    Ok(ok)      => {
+      if ok != file_size {
+        panic!("Failed to read file")
+      }
+    }
+    Err(err)    => { panic!("Failed to read file: {}", err) }
+  }
+
+  return file_buffer
 }

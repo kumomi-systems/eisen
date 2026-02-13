@@ -72,7 +72,7 @@ pub struct BootInfo {
 
   uuid0:          u16,
   res_s0_0:       [u8; 6],
-  kentry:         core::ptr::NonNull<extern "C" fn () -> !>,
+  kentry:         core::ptr::NonNull<extern "C" fn () -> u8>,
   kargs:          core::ptr::NonNull<()>,
   ksysinfo:       core::ptr::NonNull<()>,
   stub_end:       u64,
@@ -157,7 +157,7 @@ impl BootInfo {
   expose_member!(patch_version,  u8);
   expose_member!(version_flags,  u8);
   expose_member!(version_name,   [u8; 16]);
-  expose_member!(kentry,         core::ptr::NonNull<extern "C" fn () -> !>);
+  expose_member!(kentry,         core::ptr::NonNull<extern "C" fn () -> u8>);
   expose_member!(kargs,          core::ptr::NonNull<()>);
   expose_member!(ksysinfo,       core::ptr::NonNull<()>);
   expose_member!(stub_end,       u64);
